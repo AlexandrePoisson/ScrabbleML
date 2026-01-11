@@ -1,0 +1,11 @@
+src/scrabble_ai.egg-info/SOURCES.txt
+Scrabble/.github/copilot-instructions.md
+Scrabble/.venv/
+Scrabble/__pycache__/
+Scrabble/.pytest_cache
+Scrabble/.github
+.venv
+src/scrabble_ai.egg-info
+src/scrabble/__pycache__
+uv.lock
+tests/__pycache__

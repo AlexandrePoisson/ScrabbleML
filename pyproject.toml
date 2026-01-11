@@ -1,0 +1,29 @@
+[project]
+name = "scrabble-ai"
+version = "0.1.0"
+description = "Scrabble board OCR + move suggestion (baseline with pluggable algorithms)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [ { name = "Scrabble AI" } ]
+dependencies = [
+  "numpy>=1.24",
+  "opencv-python>=4.8",
+  "Pillow>=10.0",
+  "pytesseract>=0.3.10",
+  "Flask>=3.0"
+]
+
+[project.optional-dependencies]
+easyocr = ["easyocr>=1.7.0"]
+cnn = [
+  "torch>=2.2.0",
+  "torchvision>=0.17.0",
+]
+
+[project.scripts]
+scrabble = "scrabble.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

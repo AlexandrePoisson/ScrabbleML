@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scrabble CNN: Label and train</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .labeler-container { max-width: 960px; margin: 0 auto; padding: 16px; }
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .image-panel { margin-top: 16px; display: flex; gap: 16px; align-items: flex-start; }
+    .image-panel img { max-width: 320px; border: 1px solid #ccc; }
+    .label-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .split { margin-top: 8px; }
+    .status { margin-top: 8px; }
+    button.label-btn { padding: 6px 10px; }
+    .train-panel { margin-top: 0; padding-top: 0; border-top: 0; }
+    .train-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; align-items: end; }
+    .train-grid label { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .train-grid input, .train-grid select { width: 160px; }
+    .train-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .train-charts { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .train-logs { margin-top: 10px; background: #111; color: #eee; padding: 10px; border-radius: 6px; max-height: 240px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="labeler-container">
+    <div class="row-gap" style="justify-content: space-between;">
+      <h2 style="margin: 0;">Scrabble CNN: Label and train</h2>
+      <div class="row-gap">
+        <a href="/build" style="text-decoration:none;">Build board</a>
+        <a href="/label" style="text-decoration:none; font-weight:700;">Label and train</a>
+        <a href="/play" style="text-decoration:none;">Play</a>
+      </div>
+    </div>
+    <section class="section" style="margin-top: 16px;">
+      <h2 style="margin: 0 0 0.75rem 0;">Label and train</h2>
+      <div class="controls">
+        <label>Session:
+          <select id="sessionSelect"></select>
+        </label>
+        <button id="startBtn">Start Labeling</button>
+        <label>Min Confidence:
+          <input type="number" id="minConfThreshold" min="0" max="1" step="0.05" value="0.5" style="width: 60px;">
+        </label>
+        <button id="detectBtn">Detect Mislabels</button>
+        <button id="regenManifestsBtn">Regenerate manifest</button>
+        <span id="status">Load a session to begin.</span>
+      </div>
+      <div class="image-panel">
+        <div>
+          <img id="cellImg" src="" alt="Cell" />
+          <div class="status" id="meta"></div>
+        </div>
+        <div>
+          <div id="predictionHint" style="margin-top: 8px; padding: 8px; background: #ffe; border: 1px solid #cc9; display: none;">
+            <strong>Model suggests:</strong> <span id="predictedLabel"></span> (confidence: <span id="predictedConf"></span>)
+          </div>
+          <div class="label-buttons" id="labelButtons"></div>
+          <button id="skipBtn">Skip</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="margin-top: 16px;">
+      <h2 style="margin: 0 0 0.75rem 0;">Train Model</h2>
+    <div class="train-panel">
+      <div class="train-grid">
+        <label>Epochs <input type="number" id="trainEpochs" min="1" step="1" value="200"></label>
+        <label>Batch size <input type="number" id="trainBatchSize" min="1" step="1" value="128"></label>
+        <label>Learning rate <input type="number" id="trainLr" min="0" step="0.0001" value="0.001"></label>
+        <label>Val fraction <input type="number" id="trainValFraction" min="0" max="0.9" step="0.05" value="0.2"></label>
+        <label>Device
+          <select id="trainDevice">
+            <option value="">auto</option>
+            <option value="cpu">cpu</option>
+            <option value="cuda">cuda</option>
+          </select>
+        </label>
+        <label>Num workers <input type="number" id="trainNumWorkers" min="0" step="1" value="0"></label>
+        <label>Image size <input type="number" id="trainImageSize" min="16" step="1" value="32"></label>
+        <label>Seed <input type="number" id="trainSeed" step="1" value="42"></label>
+        <label style="justify-content: flex-start; gap: 10px;">No augment <input type="checkbox" id="trainNoAugment"></label>
+        <label>Aug rotation <input type="number" id="trainAugRotation" step="0.5" value="4"></label>
+        <label>Aug translate X <input type="number" id="trainAugTranslateX" step="0.01" value="0.05"></label>
+        <label>Aug translate Y <input type="number" id="trainAugTranslateY" step="0.01" value="0.05"></label>
+        <label>Aug scale min <input type="number" id="trainAugScaleMin" step="0.01" value="0.95"></label>
+        <label>Aug scale max <input type="number" id="trainAugScaleMax" step="0.01" value="1.05"></label>
+        <label>Aug multiplier <input type="number" id="trainAugMultiplier" min="1" step="1" value="3"></label>
+      </div>
+      <div class="train-actions">
+        <button id="trainStartBtn">Start training</button>
+        <button id="trainStopBtn">Stop</button>
+        <button id="trainReloadModelBtn">Reload model</button>
+        <button id="trainRefreshBtn">Refresh status</button>
+        <span id="trainStatus">Idle.</span>
+      </div>
+      <div class="train-charts">
+        <div>
+          <div style="margin-bottom: 6px; font-weight: 600;">Loss</div>
+          <canvas id="trainLossChart" height="170"></canvas>
+        </div>
+        <div>
+          <div style="margin-bottom: 6px; font-weight: 600;">Accuracy</div>
+          <canvas id="trainAccChart" height="170"></canvas>
+        </div>
+      </div>
+      <div class="train-logs" id="trainLogs" style="display:none;"></div>
+    </div>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/static/js/labeler.js"></script>
+</body>
+</html>

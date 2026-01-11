@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scrabble – Play</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="row-gap" style="justify-content: space-between;">
+      <h1 style="margin: 0;">Scrabble – Best Move</h1>
+      <div class="row-gap">
+        <a href="/build" style="text-decoration:none;">Build board</a>
+        <a href="/label" style="text-decoration:none;">Label and train</a>
+        <a href="/play" style="text-decoration:none; font-weight:700;">Play</a>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2 style="margin: 0 0 0.75rem 0;">Settings</h2>
+      <div class="row-gap">
+        <label>Language:
+          <select id="lang">
+            <option value="EN">EN</option>
+            <option value="FR" selected>FR</option>
+          </select>
+        </label>
+
+        <label>Dictionary:
+          <select id="dictKey">
+            <option value="en_small">en_small.txt</option>
+            <option value="fr_small">fr_small.txt</option>
+            <option value="fr_ods8" selected>fr_ods8.txt</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="row-gap" style="justify-content: space-between;">
+        <h2 style="margin: 0;">Board</h2>
+        <div class="row-gap">
+          <button id="clearBoardBtn">Clear</button>
+          <button type="button" id="loadFromPictureBtn">Load from picture</button>
+        </div>
+      </div>
+
+      <div id="pictureLoader" class="section" style="margin-top: 0.75rem; display:none;">
+        <div class="row-gap" style="justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Load board from picture</strong>
+            <span style="color:#666; margin-left: .5rem;">(CNN, inner=0.01, outer=0.05, conf=75, PSM=10)</span>
+          </div>
+          <button type="button" id="pictureCloseBtn">Close</button>
+        </div>
+
+        <input type="file" id="pictureInput" accept="image/*" style="display:none;" />
+
+        <div class="row-gap" style="margin-top: 0.5rem;">
+          <button type="button" id="picturePickBtn">Select image…</button>
+          <span id="pictureStatus" style="color:#666;"></span>
+        </div>
+
+        <div style="margin-top: 0.75rem;">
+          <div class="label">Corners (drag points)</div>
+          <canvas id="pictureCanvas" style="max-width: 100%; border: 1px solid #ddd;"></canvas>
+        </div>
+
+        <div class="row-gap" style="margin-top: 0.75rem;">
+          <button type="button" id="pictureWarpBtn" disabled>Warp preview</button>
+          <button type="button" id="pictureExtractBtn" disabled>Extract & load into Play</button>
+        </div>
+
+        <div style="margin-top: 0.75rem;">
+          <img id="pictureWarpPreview" alt="Warped preview"
+            style="max-width: 100%; border: 1px solid #ddd; display:none;" />
+        </div>
+      </div>
+
+      <div class="play-layout">
+        <div>
+          <div id="playBoard" class="play-board" aria-label="Scrabble board"></div>
+        </div>
+
+
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 style="margin: 0 0 0.75rem 0;">Rack</h2>
+      <div class="row-gap">
+        <label>Rack:
+          <input id="rack" type="text" value="GNUOEDI" style="width: 120px;" />
+        </label>
+
+        <button id="randomRackBtn">Random rack (7)</button>
+        <button id="findBestBtn">Find best move</button>
+        <button id="placeBestBtn" disabled>Place best move</button>
+        <span id="moveStatus"></span>
+      </div>
+
+
+      <div id="moveDetails" class="section" style="margin-top: 0.75rem; display:none;"></div>
+    </section>
+
+
+
+    <section class="section">
+      <h2 style="margin: 0 0 0.75rem 0;">Debug</h2>
+      <div class="row-gap">
+
+        <div>
+          <div class="label">Board string (15×15)</div>
+          <textarea id="boardString" class="play-textarea" spellcheck="false"></textarea>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script>
+    window.SCRABBLE_PREMIUMS = {{ premiums | tojson }};
+    window.SCRABBLE_LETTER_SCORES = {{ letter_scores | tojson }};
+  </script>
+  <script src="/static/js/play.js"></script>
+</body>
+
+</html>
